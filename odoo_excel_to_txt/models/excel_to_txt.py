@@ -1,13 +1,35 @@
-from odoo import models, fields, api
+def convert_to_txt(self):
+    """ Convierte un archivo Excel en un archivo TXT y lo descarga """
+    if not self.file:
+        return
 
-class ExcelToTxt(models.Model):
-    _name = 'excel.to.txt'
-    _description = 'Módulo para conversión de Excel a TXT'
+    # Decodificar archivo
+    file_content = base64.b64decode(self.file)
+    
+    # Leer el archivo Excel
+    workbook = xlrd.open_workbook(file_contents=file_content)
+    sheet = workbook.sheet_by_index(0)  # Tomar la primera hoja
 
-    name = fields.Char(string='Nombre', required=True)
-    file = fields.Binary(string='Archivo Excel', required=True)
-    file_name = fields.Char(string='Nombre del archivo')
+    # Convertir el contenido en texto
+    txt_content = ""
+    for row_idx in range(sheet.nrows):
+        row_values = [str(sheet.cell_value(row_idx, col_idx)) for col_idx in range(sheet.ncols)]
+        txt_content += ",".join(row_values) + "\n"
 
-    def convert_to_txt(self):
-        # Lógica para convertir Excel a TXT
-        pass
+    # Codificar el TXT en base para su descarga en Odoo
+    txt_encoded = base64.b64encode(txt_content.encode('utf-8'))
+
+    # Crear el archivo adjunto en Odoo
+    attachment = self.env['ir.attachment'].create({
+        'name': self.file_name.replace('.xls', '.txt').replace('.xlsx', '.txt'),
+        'type': 'binary',
+        'datas': txt_encoded,
+        'res_model': 'excel.to.txt',
+        'res_id': self.id,
+    })
+
+    return {
+        'type': 'ir.actions.act_url',
+        'url': f'/web/content/{attachment.id}?download=true',
+        'target': 'new',
+    }
