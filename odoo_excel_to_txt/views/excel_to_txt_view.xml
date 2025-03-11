@@ -1,0 +1,19 @@
+<odoo>
+    <record id="view_excel_to_txt_form" model="ir.ui.view">
+        <field name="name">excel.to.txt.form</field>
+        <field name="model">excel.to.txt</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="file"/>
+                    </group>
+                    <footer>
+                        <button name="convert_to_txt" string="Convertir a TXT" type="object" class="btn-primary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
